@@ -3,6 +3,7 @@ import {
   Droplet, Moon, Activity, Heart, Leaf, Sparkles, Flame, Pill,
   Calendar as CalendarIcon, BarChart2, BookOpen, Settings, User,
   Plus, Check, X, ChevronLeft, ChevronRight, Home, Trash2, ChevronDown,
+n  MessageCircle, Send, Bot, ShieldAlert,
 } from "lucide-react";
 import {
   LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -709,6 +710,120 @@ function LearnPage({ conditions }) {
   );
 }
 
+/* ============================== ask ritu page ============================== */
+
+const CHAT_STARTERS = [
+  "What can help with my cramps?",
+  "My period is late. What should I do?",
+  "How can I manage PCOS symptoms?",
+  "When should I see a gynecologist?",
+];
+
+function getCareResponse(question, profile) {
+  const text = question.toLowerCase();
+  const tracked = profile.conditions.map((id) => CONDITIONS.find((c) => c.id === id)?.label).filter(Boolean);
+  const context = tracked.length ? ` I also know you are tracking ${tracked.join(", ")}.` : "";
+
+  if (/(emergency|faint|fainting|severe bleeding|soaking|pregnan).*(pain|bleed|cramp)|chest pain|can't breathe|cannot breathe|shortness of breath/.test(text)) {
+    return {
+      title: "Please get urgent medical help",
+      body: "Severe pain, fainting, trouble breathing, or very heavy bleeding can be an emergency. Please contact local emergency services or go to the nearest emergency department now. If pregnancy is possible, mention that to the clinician.",
+      kind: "urgent",
+    };
+  }
+  if (/(cramp|period pain|painful period|pelvic pain)/.test(text)) {
+    return {
+      title: "For period or pelvic pain",
+      body: `A warm compress, gentle movement, hydration, and rest may help. If you normally can take them safely, an over-the-counter pain reliever used exactly as directed on its label may help too.${context} Pain that is severe, new, worsening, happens outside your period, or stops you doing normal activities deserves a gynecologist visit.`,
+      kind: "care",
+    };
+  }
+  if (/(late|missed|irregular|delay|delayed).*(period|cycle)|period.*(late|missed|irregular)/.test(text)) {
+    return {
+      title: "About a late or irregular period",
+      body: `Stress, illness, sleep changes, weight changes, contraception, PCOS, and perimenopause can all affect timing. Log the date and any symptoms, and consider a pregnancy test if pregnancy is possible. Book a gynecology appointment if this keeps happening, your cycles change suddenly, or you go 3 months without a period.${context}`,
+      kind: "care",
+    };
+  }
+  if (/(pcos|pcod|acne|facial hair|hair growth|insulin|ovulation)/.test(text)) {
+    return {
+      title: "Support for PCOS or PCOD symptoms",
+      body: `Regular meals with protein and fibre, consistent sleep, and movement you can sustain are useful foundations. Track cycle timing, bleeding, pain, mood, and skin or hair changes so a clinician can see the pattern.${context} PCOS care is individual, so a gynecologist or endocrinologist should guide medicines and tests.`,
+      kind: "care",
+    };
+  }
+  if (/(hot flash|night sweat|menopause|perimenopause|sleep)/.test(text)) {
+    return {
+      title: "For hot flashes or sleep changes",
+      body: `Try lighter layers, a cooler bedroom, regular movement, and a wind-down routine. Note triggers and how often symptoms happen.${context} Talk with a gynecologist if symptoms disrupt sleep or daily life; several treatment options may be appropriate, depending on your history.`,
+      kind: "care",
+    };
+  }
+  if (/(doctor|gynecologist|gynac|appointment|checkup|check-up)/.test(text)) {
+    return {
+      title: "When to book a gynecologist",
+      body: "Please book a visit for persistent or worsening pain, bleeding between periods or after sex, very heavy bleeding, repeated missed periods, unusual discharge or odor, or symptoms affecting daily life. Bring your Ritu logs, medicines, and questions with you.",
+      kind: "care",
+    };
+  }
+  return {
+    title: "Let’s make this specific",
+    body: `Tell me what you are feeling, when it started, how severe it is, and whether pregnancy is possible. I can help you think through self-care and what kind of medical support may be appropriate.${context}`,
+    kind: "care",
+  };
+}
+
+function AskRituPage({ profile }) {
+  const [question, setQuestion] = useState("");
+  const [messages, setMessages] = useState([
+    { from: "ritu", title: `Hi ${profile.name}, I'm Ritu Care`, body: "I can help you understand common women’s health concerns, choose practical next steps, and spot when it’s time to see a clinician. What’s on your mind?", kind: "care" },
+  ]);
+
+  function ask(value = question) {
+    const trimmed = value.trim();
+    if (!trimmed) return;
+    setMessages((prev) => [...prev, { from: "you", body: trimmed }, { from: "ritu", ...getCareResponse(trimmed, profile) }]);
+    setQuestion("");
+  }
+
+  return (
+    <div className="page ask-page">
+      <div className="ask-heading">
+        <div>
+          <p className="eyebrow"><MessageCircle size={14} /> PRIVATE HEALTH CHAT</p>
+          <h1 className="serif-headline">Ask Ritu</h1>
+          <p className="sub">A calm first stop for cycle, hormone and symptom questions.</p>
+        </div>
+        <div className="ask-avatar"><Bot size={22} /></div>
+      </div>
+
+      <div className="safety-note"><ShieldAlert size={17} /><span>Ritu Care shares general health information, not a diagnosis. For severe symptoms or an emergency, contact local medical services.</span></div>
+
+      <div className="chat-thread">
+        {messages.map((message, index) => (
+          <div key={index} className={`chat-message ${message.from}`}>
+            {message.from === "ritu" && <div className="chat-mark"><Bot size={15} /></div>}
+            <div className={`chat-bubble ${message.kind || ""}`}>
+              {message.title && <strong>{message.title}</strong>}
+              <p>{message.body}</p>
+              {message.kind === "urgent" && <span className="urgent-label">Urgent care may be needed</span>}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="starter-row">
+        {CHAT_STARTERS.map((starter) => <button key={starter} type="button" className="starter-chip" onClick={() => ask(starter)}>{starter}</button>)}
+      </div>
+
+      <form className="chat-composer" onSubmit={(e) => { e.preventDefault(); ask(); }}>
+        <input className="text-input" value={question} onChange={(e) => setQuestion(e.target.value)} placeholder="Describe what you’re experiencing..." aria-label="Ask Ritu a health question" />
+        <button className="send-btn" type="submit" aria-label="Send question" disabled={!question.trim()}><Send size={17} /></button>
+      </form>
+    </div>
+  );
+}
+
 /* ============================== profile page ============================== */
 
 function ProfilePage({ profile, onSave, onReset }) {
@@ -792,6 +907,7 @@ function ProfilePage({ profile, onSave, onReset }) {
 
 const NAV = [
   { id: "dashboard", label: "Today", icon: Home },
+  { id: "ask", label: "Ask Ritu", icon: MessageCircle },
   { id: "log", label: "Calendar", icon: CalendarIcon },
   { id: "habits", label: "Habits", icon: Check },
   { id: "insights", label: "Insights", icon: BarChart2 },
@@ -850,6 +966,7 @@ const STYLE = `
 .serif-headline.small { font-size: 20px; margin: 0; }
 .sub { color: var(--ink-soft); font-size: 14px; margin: 0 0 20px; line-height: 1.5; max-width: 60ch; }
 .hint { color: var(--ink-soft); font-size: 12px; margin: 4px 0 16px; }
+.eyebrow { display: flex; align-items: center; gap: 6px; color: var(--sage); font-size: 10px; font-weight: 600; letter-spacing: .08em; margin: 0 0 8px; }
 
 .app-shell { display: flex; min-height: 100vh; }
 .sidebar { display: none; }
@@ -972,6 +1089,28 @@ const STYLE = `
 .confirm-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; font-size: 13px; color: var(--ink-soft); }
 
 .loading-screen { display: flex; align-items: center; justify-content: center; min-height: 100vh; color: var(--ink-soft); font-size: 14px; }
+.ask-page { gap: 0; }
+.ask-heading { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 4px; }
+.ask-avatar { display: flex; align-items: center; justify-content: center; width: 46px; height: 46px; border-radius: 14px; color: var(--berry); background: #F0DED8; }
+.safety-note { display: flex; gap: 9px; align-items: flex-start; color: var(--ink-soft); background: #F5EBDD; border: 1px solid #EBD6BA; border-radius: 12px; padding: 11px 12px; font-size: 11.5px; line-height: 1.45; margin: 4px 0 20px; }
+.safety-note svg { color: var(--gold); flex-shrink: 0; margin-top: 1px; }
+.chat-thread { display: flex; flex-direction: column; gap: 13px; margin-bottom: 18px; }
+.chat-message { display: flex; gap: 8px; align-items: flex-end; }
+.chat-message.you { justify-content: flex-end; }
+.chat-mark { display: flex; align-items: center; justify-content: center; width: 26px; height: 26px; border-radius: 9px; color: var(--berry); background: #F0DED8; flex-shrink: 0; }
+.chat-bubble { max-width: 88%; padding: 12px 14px; border-radius: 15px 15px 15px 4px; background: #fff; border: 1px solid var(--border); }
+.chat-message.you .chat-bubble { border-radius: 15px 15px 4px 15px; background: var(--berry); border-color: var(--berry); color: #fff; }
+.chat-bubble strong { display: block; font-family: 'Fraunces', serif; font-size: 16px; margin-bottom: 5px; }
+.chat-bubble p { font-size: 13px; line-height: 1.55; margin: 0; }
+.chat-bubble.urgent { border-color: #D99B73; background: #FFF5E9; }
+.urgent-label { display: block; color: #A34E2D; font-size: 11px; font-weight: 600; margin-top: 9px; }
+.starter-row { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 12px; }
+.starter-chip { color: var(--berry); background: transparent; border: 1px solid var(--border); border-radius: 999px; padding: 7px 10px; font: 12px 'Work Sans', sans-serif; cursor: pointer; text-align: left; }
+.starter-chip:hover { background: #F5E9E4; border-color: var(--berry); }
+.chat-composer { position: relative; display: flex; align-items: center; }
+.chat-composer .text-input { padding-right: 48px; margin-bottom: 0; min-height: 46px; }
+.send-btn { position: absolute; right: 7px; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border: none; border-radius: 9px; background: var(--berry); color: #fff; cursor: pointer; }
+.send-btn:disabled { opacity: .35; cursor: not-allowed; }
 `;
 
 export default function RituApp() {
@@ -1102,6 +1241,8 @@ export default function RituApp() {
           onDelete={deleteLog}
         />
       );
+    } else if (page === "ask") {
+      content = <AskRituPage profile={profile} />;
     } else if (page === "habits") {
       content = <HabitsPage habitsData={habitsData} onToggleHabit={toggleHabit} onAddHabit={addHabit} onRemoveHabit={removeHabit} />;
     } else if (page === "insights") {
