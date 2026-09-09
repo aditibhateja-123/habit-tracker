@@ -529,7 +529,7 @@ function Onboarding({ onDone }) {
   const [periodLength, setPeriodLength] = useState(5);
 
   const menopauseOnly = conditions.length > 0 && conditions.every((c) => c === "menopause");
-  const canContinue = name.trim().length > 0 && conditions.length > 0;
+  const canContinue = name.trim().length > 0 && conditions.length > 0 && Number(age) > 0 && Number(weight) > 0;
 
   function toggle(id) {
     setConditions((prev) => (prev.includes(id) ? prev.filter((c) => c !== id) : [...prev, id]));
@@ -538,8 +538,8 @@ function Onboarding({ onDone }) {
   function submit() {
     onDone({
       name: name.trim(),
-      age: age ? Number(age) : null,
-      weight: weight ? Number(weight) : null,
+      age: Number(age),
+      weight: Number(weight),
       conditions,
       lastPeriodStart: menopauseOnly ? null : lastPeriodStart,
       cycleLength: Number(cycleLength) || 28,
@@ -559,11 +559,11 @@ function Onboarding({ onDone }) {
         <div className="two-col">
           <div>
             <label className="field-label">Age</label>
-            <input type="number" min={10} max={100} className="text-input" value={age} onChange={(e) => setAge(e.target.value)} placeholder="Optional" />
+            <input type="number" min={10} max={100} className="text-input" value={age} onChange={(e) => setAge(e.target.value)} placeholder="e.g. 24" />
           </div>
           <div>
             <label className="field-label">Weight (kg)</label>
-            <input type="number" min={20} max={200} className="text-input" value={weight} onChange={(e) => setWeight(e.target.value)} placeholder="Optional" />
+            <input type="number" min={20} max={200} className="text-input" value={weight} onChange={(e) => setWeight(e.target.value)} placeholder="e.g. 60" />
           </div>
         </div>
 
@@ -1132,6 +1132,7 @@ function ProfilePage({ profile, onSave, onReset }) {
   }
 
   const menopauseOnly = conditions.length > 0 && conditions.every((c) => c === "menopause");
+  const canSave = Number(age) > 0 && Number(weight) > 0;
 
   return (
     <div className="page">
@@ -1143,13 +1144,14 @@ function ProfilePage({ profile, onSave, onReset }) {
       <div className="two-col">
         <div>
           <label className="field-label">Age</label>
-          <input type="number" min={10} max={100} className="text-input" value={age} onChange={(e) => setAge(e.target.value)} placeholder="Optional" />
+          <input type="number" min={10} max={100} className="text-input" value={age} onChange={(e) => setAge(e.target.value)} placeholder="e.g. 24" />
         </div>
         <div>
           <label className="field-label">Weight (kg)</label>
-          <input type="number" min={20} max={200} className="text-input" value={weight} onChange={(e) => setWeight(e.target.value)} placeholder="Optional" />
+          <input type="number" min={20} max={200} className="text-input" value={weight} onChange={(e) => setWeight(e.target.value)} placeholder="e.g. 60" />
         </div>
       </div>
+      {!canSave && <p className="hint">Age and weight are required.</p>}
 
       <label className="field-label">What you're tracking</label>
       <div className="chip-row">
@@ -1179,10 +1181,11 @@ function ProfilePage({ profile, onSave, onReset }) {
 
       <button
         className="btn-primary"
+        disabled={!canSave}
         onClick={() => onSave({
           name: name.trim() || profile.name,
-          age: age ? Number(age) : null,
-          weight: weight ? Number(weight) : null,
+          age: Number(age),
+          weight: Number(weight),
           conditions,
           lastPeriodStart: menopauseOnly ? null : lastPeriodStart,
           cycleLength: Number(cycleLength) || 28,
