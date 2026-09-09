@@ -872,7 +872,7 @@ function HabitsPage({ habitsData, onToggleHabit, onAddHabit, onRemoveHabit }) {
 
 /* ============================== insights page ============================== */
 
-function InsightsPage({ cycleLogs, habitsData }) {
+function InsightsPage({ cycleLogs, habitsData, mealsData }) {
   const cycleLengths = useMemo(() => {
     const starts = Object.keys(cycleLogs)
       .filter((k) => cycleLogs[k]?.flow && cycleLogs[k].flow !== "none")
@@ -910,6 +910,38 @@ function InsightsPage({ cycleLogs, habitsData }) {
       return { name: h.name.length > 14 ? h.name.slice(0, 14) + "…" : h.name, pct: Math.round((done / 30) * 100) };
     });
   }, [habitsData]);
+
+  const mealSymptomInsight = useMemo(() => {
+    const mealDays = Object.keys(mealsData.completions || {});
+    if (mealDays.length < 6) return null;
+
+    const mealsEatenOn = (k) => MEAL_SLOTS.filter((m) => mealsData.completions[k]?.[m.id]).length;
+
+    const symptomTally = {};
+    Object.entries(cycleLogs).forEach(([k, log]) => {
+      (log.symptoms || []).forEach((s) => {
+        symptomTally[s] = symptomTally[s] || new Set();
+        symptomTally[s].add(k);
+      });
+    });
+
+    let best = null;
+    Object.entries(symptomTally).forEach(([symptom, daySet]) => {
+      const withSymptom = mealDays.filter((k) => daySet.has(k));
+      const withoutSymptom = mealDays.filter((k) => !daySet.has(k));
+      if (withSymptom.length < 3 || withoutSymptom.length < 3) return;
+
+      const avgWith = withSymptom.reduce((sum, k) => sum + mealsEatenOn(k), 0) / withSymptom.length;
+      const avgWithout = withoutSymptom.reduce((sum, k) => sum + mealsEatenOn(k), 0) / withoutSymptom.length;
+      const diff = Math.abs(avgWith - avgWithout);
+
+      if (diff >= 0.5 && (!best || diff > best.diff)) {
+        best = { symptom, avgWith, avgWithout, diff };
+      }
+    });
+
+    return best;
+  }, [cycleLogs, mealsData]);
 
   return (
     <div className="page">
@@ -964,6 +996,20 @@ function InsightsPage({ cycleLogs, habitsData }) {
             </BarChart>
           </ResponsiveContainer>
         </div>
+      )}
+
+      <h2 className="section-title">Meals & symptoms</h2>
+      {mealSymptomInsight ? (
+        <div className="insight-card">
+          <p>
+            On days you logged <strong>{mealSymptomInsight.symptom.toLowerCase()}</strong>, you ate an average of{" "}
+            <strong>{mealSymptomInsight.avgWith.toFixed(1)}</strong> of {MEAL_SLOTS.length} meals — versus{" "}
+            <strong>{mealSymptomInsight.avgWithout.toFixed(1)}</strong> on other days.
+          </p>
+          <p className="disclaimer">This is just a pattern in your own logs, not a cause-and-effect finding — worth mentioning to a doctor if it keeps showing up, not a diagnosis on its own.</p>
+        </div>
+      ) : (
+        <EmptyState>Log your meals and symptoms for a couple more weeks to see if any patterns show up here.</EmptyState>
       )}
     </div>
   );
@@ -1397,6 +1443,10 @@ const STYLE = `
 
 .chart-box { border: 1px solid var(--border); border-radius: 16px; padding: 12px 8px 4px; background: #fff; margin-bottom: 24px; }
 
+.insight-card { border: 1px solid var(--border); border-radius: 16px; padding: 16px; background: #fff; margin-bottom: 24px; }
+.insight-card p { margin: 0 0 8px; font-size: 13.5px; line-height: 1.55; }
+.insight-card p:last-child { margin-bottom: 0; }
+
 .accordion { border: 1px solid var(--border); border-radius: 16px; overflow: hidden; background: #fff; }
 .accordion-item { border-bottom: 1px solid var(--border); }
 .accordion-item:last-child { border-bottom: none; }
@@ -1613,7 +1663,7 @@ export default function RituApp() {
     } else if (page === "meals") {
       content = <MealsPage profile={profile} mealsData={mealsData} onToggleMeal={toggleMeal} />;
     } else if (page === "insights") {
-      content = <InsightsPage cycleLogs={cycleLogs} habitsData={habitsData} />;
+      content = <InsightsPage cycleLogs={cycleLogs} habitsData={habitsData} mealsData={mealsData} />;
     } else if (page === "learn") {
       content = <LearnPage conditions={profile.conditions} />;
     } else if (page === "profile") {
