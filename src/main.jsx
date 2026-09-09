@@ -1,8 +1,8 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import RituApp from "./RituApp.jsx";
+import App from "./App.jsx";
 
-// RituApp.jsx was originally built against a sandboxed `window.storage`
+// App.jsx was originally built against a sandboxed `window.storage`
 // API. This shim backs it with localStorage so the app runs standalone.
 // Swap it out once real auth + cloud sync (Section 6 of the plan) is wired up.
 if (!window.storage) {
@@ -22,6 +22,6 @@ if (!window.storage) {
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
-    <RituApp />
+    <App />
   </React.StrictMode>
 );
