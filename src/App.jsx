@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import {
   Droplet, Moon, Activity, Heart, Leaf, Sparkles, Flame, Pill,
   Calendar as CalendarIcon, BarChart2, BookOpen, Settings, User,
@@ -980,6 +980,13 @@ function ChatWidget() {
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState([{ id: `m-${Date.now()}`, from: "bot", text: CHAT_WELCOME }]);
   const [input, setInput] = useState("");
+  const bodyRef = useRef(null);
+
+  useEffect(() => {
+    if (open && bodyRef.current) {
+      bodyRef.current.scrollTop = bodyRef.current.scrollHeight;
+    }
+  }, [messages, open]);
 
   const send = (text) => {
     const clean = text.trim();
@@ -1002,7 +1009,7 @@ function ChatWidget() {
             <button className="icon-btn" onClick={() => setOpen(false)} aria-label="Close"><X size={16} /></button>
           </div>
           <div className="chat-disclaimer"><ShieldAlert size={13} /> Not a doctor — general guidance only. For anything urgent, contact a healthcare provider.</div>
-          <div className="chat-body">
+          <div className="chat-body" ref={bodyRef}>
             {messages.map((m) => (
               <div key={m.id} className={`chat-msg ${m.from}`}>{m.text}</div>
             ))}
