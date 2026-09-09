@@ -3,7 +3,7 @@ import {
   Droplet, Moon, Activity, Heart, Leaf, Sparkles, Flame, Pill,
   Calendar as CalendarIcon, BarChart2, BookOpen, Settings, User,
   Plus, Check, X, ChevronLeft, ChevronRight, Home, Trash2, ChevronDown,
-  MessageCircle, Send, Bot, ShieldAlert,
+  MessageCircle, Send, Bot, ShieldAlert, Utensils,
 } from "lucide-react";
 import {
   LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -130,6 +130,136 @@ const LEARN_CONTENT = {
       "Whatever you're dealing with, a simple daily log is one of the most useful things you can bring to a doctor's visit.",
       "Small, repeatable habits (water, sleep, movement, a calm moment) tend to compound more than occasional big efforts.",
     ],
+  },
+};
+
+/* ============================== diet & meals ============================== */
+
+const MEAL_SLOTS = [
+  { id: "breakfast", label: "Breakfast" },
+  { id: "lunch", label: "Lunch" },
+  { id: "snack", label: "Snack" },
+  { id: "dinner", label: "Dinner" },
+];
+
+const DIET_CONTENT = {
+  periods: {
+    eat: [
+      "Iron-rich foods on heavier flow days — leafy greens, lentils, jaggery, or lean meat if you eat it",
+      "Vitamin C alongside iron-rich meals (citrus, amla, bell peppers) to help your body absorb it",
+      "Warm, easy-to-digest meals if cramps make you less hungry",
+      "Plenty of water, especially if you're prone to headaches around your period",
+    ],
+    limit: [
+      "Very salty or fried food, which can worsen bloating",
+      "Excess caffeine, which can worsen cramps or anxiety for some people",
+    ],
+    sample: {
+      breakfast: "Oats or poha with fruit and a handful of nuts",
+      lunch: "Dal, roti or rice, a green vegetable, and salad",
+      snack: "Fruit, roasted chana, or yogurt",
+      dinner: "A light khichdi or soup-based meal with vegetables",
+    },
+  },
+  pcod: {
+    eat: [
+      "Protein and fibre at every meal (dal, eggs, paneer, beans, vegetables) to help keep you full and blood sugar steady",
+      "Whole grains over refined ones — brown rice, whole wheat, millets",
+      "Regular meal timings rather than skipping meals, which can help hormone regulation",
+    ],
+    limit: [
+      "Sugary drinks and refined snacks (biscuits, white bread, sweets), which can spike blood sugar",
+      "Very large gaps between meals",
+    ],
+    sample: {
+      breakfast: "Vegetable poha or a besan chilla with a side of curd",
+      lunch: "Roti, dal, a vegetable sabzi, and a bowl of salad",
+      snack: "A handful of nuts, or roasted makhana",
+      dinner: "Grilled paneer or fish with sautéed vegetables",
+    },
+  },
+  pcos: {
+    eat: [
+      "Protein and fibre together at each meal to help even out energy through the day",
+      "Healthy fats — nuts, seeds, olive oil, avocado — which can help with hormone balance",
+      "Low-glycemic carbs (millets, oats, whole wheat) over refined ones",
+    ],
+    limit: [
+      "Sugary drinks, refined carbs, and fried food, which can worsen insulin resistance",
+      "Excess dairy, if you notice it worsens acne or bloating for you specifically",
+    ],
+    sample: {
+      breakfast: "Moong dal chilla, or oats with nuts and seeds",
+      lunch: "Millet roti, dal, a vegetable, and salad",
+      snack: "Greek yogurt or a small portion of nuts",
+      dinner: "Grilled chicken, fish, or paneer with a big portion of vegetables",
+    },
+  },
+  endometriosis: {
+    eat: [
+      "Anti-inflammatory foods — oily fish, leafy greens, berries, nuts, olive oil",
+      "Fibre-rich foods (vegetables, whole grains, legumes), which may help with estrogen balance",
+      "Warm, soothing foods on painful days — soups, stews, herbal teas",
+    ],
+    limit: [
+      "Red and processed meat, which some people find worsens inflammation",
+      "Excess caffeine and alcohol, which can worsen pain for some people",
+    ],
+    sample: {
+      breakfast: "Oats with berries, flaxseed, and walnuts",
+      lunch: "Quinoa or brown rice, dal, and a big serving of leafy greens",
+      snack: "A handful of walnuts or a piece of fruit",
+      dinner: "Baked fish or tofu with roasted vegetables",
+    },
+  },
+  perimenopause: {
+    eat: [
+      "Calcium and vitamin D-rich foods (dairy, fortified foods, leafy greens) for bone health",
+      "Phytoestrogen-containing foods like soy and flaxseed, which some people find helps with symptoms",
+      "Protein at each meal to help maintain muscle mass",
+    ],
+    limit: [
+      "Spicy food, caffeine, and alcohol if they seem to trigger your hot flashes",
+      "Late, heavy meals if they're disrupting your sleep",
+    ],
+    sample: {
+      breakfast: "Yogurt with flaxseed and fruit",
+      lunch: "Roti, dal, a vegetable, and a side of curd",
+      snack: "A small handful of almonds or a glass of milk",
+      dinner: "Grilled fish or paneer with steamed vegetables",
+    },
+  },
+  menopause: {
+    eat: [
+      "Calcium and vitamin D-rich foods for long-term bone health — dairy, fortified foods, leafy greens",
+      "Protein at each meal to help offset natural muscle loss",
+      "Plenty of water and fibre, since digestion can slow down during this transition",
+    ],
+    limit: [
+      "Excess salt, which can affect blood pressure and bone health over time",
+      "Spicy food, caffeine, or alcohol if they trigger hot flashes for you",
+    ],
+    sample: {
+      breakfast: "Vegetable upma or oats with milk and nuts",
+      lunch: "Roti, dal, a vegetable, and a bowl of curd",
+      snack: "A piece of fruit or a small glass of milk",
+      dinner: "Light soup or khichdi with vegetables",
+    },
+  },
+  other: {
+    eat: [
+      "A mix of whole grains, protein, vegetables, and fruit through the day",
+      "Enough water — a simple, easy habit that supports almost everything else",
+    ],
+    limit: [
+      "Very processed or sugary food as a regular, everyday habit",
+    ],
+    sample: {
+      breakfast: "Whatever whole-food breakfast you enjoy and will actually eat",
+      lunch: "A balanced plate — grains, protein, vegetables",
+      snack: "Fruit, nuts, or yogurt",
+      dinner: "A lighter, balanced meal a few hours before bed",
+    },
   },
 };
 
@@ -391,6 +521,8 @@ function HabitRing({ pct }) {
 
 function Onboarding({ onDone }) {
   const [name, setName] = useState("");
+  const [age, setAge] = useState("");
+  const [weight, setWeight] = useState("");
   const [conditions, setConditions] = useState([]);
   const [lastPeriodStart, setLastPeriodStart] = useState(todayKey());
   const [cycleLength, setCycleLength] = useState(28);
@@ -406,6 +538,8 @@ function Onboarding({ onDone }) {
   function submit() {
     onDone({
       name: name.trim(),
+      age: age ? Number(age) : null,
+      weight: weight ? Number(weight) : null,
       conditions,
       lastPeriodStart: menopauseOnly ? null : lastPeriodStart,
       cycleLength: Number(cycleLength) || 28,
@@ -421,6 +555,17 @@ function Onboarding({ onDone }) {
 
         <label className="field-label">What should we call you?</label>
         <input className="text-input" value={name} onChange={(e) => setName(e.target.value)} placeholder="Your name" />
+
+        <div className="two-col">
+          <div>
+            <label className="field-label">Age</label>
+            <input type="number" min={10} max={100} className="text-input" value={age} onChange={(e) => setAge(e.target.value)} placeholder="Optional" />
+          </div>
+          <div>
+            <label className="field-label">Weight (kg)</label>
+            <input type="number" min={20} max={200} className="text-input" value={weight} onChange={(e) => setWeight(e.target.value)} placeholder="Optional" />
+          </div>
+        </div>
 
         <label className="field-label">What are you tracking? (pick all that apply)</label>
         <div className="chip-row">
@@ -859,10 +1004,77 @@ function LearnPage({ conditions }) {
   );
 }
 
+/* ============================== meals page ============================== */
+
+function MealsPage({ profile, mealsData, onToggleMeal }) {
+  const tk = todayKey();
+  const todayMeals = mealsData.completions[tk] || {};
+  const doneCount = MEAL_SLOTS.filter((m) => todayMeals[m.id]).length;
+  const shownConditions = profile.conditions.length ? profile.conditions : ["other"];
+
+  return (
+    <div className="page">
+      <h1 className="serif-headline">Meals</h1>
+      <p className="sub">Track whether you've eaten today, and see food ideas that may help with what you're managing.</p>
+
+      <h2 className="section-title">Today's meals ({doneCount}/{MEAL_SLOTS.length})</h2>
+      <div className="habit-list">
+        {MEAL_SLOTS.map((m) => {
+          const done = !!todayMeals[m.id];
+          return (
+            <button key={m.id} className="habit-row" data-done={done ? "1" : "0"} onClick={() => onToggleMeal(m.id)}>
+              <span className="habit-icon"><Utensils size={18} /></span>
+              <span className="habit-name">{m.label}</span>
+              <span className="habit-check">{done ? <Check size={16} /> : null}</span>
+            </button>
+          );
+        })}
+      </div>
+
+      <h2 className="section-title">What might help you eat well today</h2>
+      <div className="accordion">
+        {shownConditions.map((cid) => {
+          const d = DIET_CONTENT[cid] || DIET_CONTENT.other;
+          const label = (CONDITIONS.find((c) => c.id === cid) || {}).label || "General wellness";
+          return (
+            <div key={cid} className="diet-card">
+              <div className="diet-card-title">{label}</div>
+
+              <div className="diet-section">
+                <p className="diet-section-label">Foods that may help</p>
+                <ul>{d.eat.map((t, i) => <li key={i}>{t}</li>)}</ul>
+              </div>
+
+              <div className="diet-section">
+                <p className="diet-section-label">Go easy on</p>
+                <ul>{d.limit.map((t, i) => <li key={i}>{t}</li>)}</ul>
+              </div>
+
+              <div className="diet-section">
+                <p className="diet-section-label">A sample day</p>
+                <ul className="diet-sample">
+                  <li><strong>Breakfast:</strong> {d.sample.breakfast}</li>
+                  <li><strong>Lunch:</strong> {d.sample.lunch}</li>
+                  <li><strong>Snack:</strong> {d.sample.snack}</li>
+                  <li><strong>Dinner:</strong> {d.sample.dinner}</li>
+                </ul>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      <p className="disclaimer">General nutrition notes, not a personalised diet plan. If you have specific dietary needs, allergies, or a diagnosed condition, please check with a doctor or dietitian.</p>
+    </div>
+  );
+}
+
 /* ============================== profile page ============================== */
 
 function ProfilePage({ profile, onSave, onReset }) {
   const [name, setName] = useState(profile.name);
+  const [age, setAge] = useState(profile.age ?? "");
+  const [weight, setWeight] = useState(profile.weight ?? "");
   const [conditions, setConditions] = useState(profile.conditions);
   const [lastPeriodStart, setLastPeriodStart] = useState(profile.lastPeriodStart || todayKey());
   const [cycleLength, setCycleLength] = useState(profile.cycleLength);
@@ -881,6 +1093,17 @@ function ProfilePage({ profile, onSave, onReset }) {
 
       <label className="field-label">Name</label>
       <input className="text-input" value={name} onChange={(e) => setName(e.target.value)} />
+
+      <div className="two-col">
+        <div>
+          <label className="field-label">Age</label>
+          <input type="number" min={10} max={100} className="text-input" value={age} onChange={(e) => setAge(e.target.value)} placeholder="Optional" />
+        </div>
+        <div>
+          <label className="field-label">Weight (kg)</label>
+          <input type="number" min={20} max={200} className="text-input" value={weight} onChange={(e) => setWeight(e.target.value)} placeholder="Optional" />
+        </div>
+      </div>
 
       <label className="field-label">What you're tracking</label>
       <div className="chip-row">
@@ -912,6 +1135,8 @@ function ProfilePage({ profile, onSave, onReset }) {
         className="btn-primary"
         onClick={() => onSave({
           name: name.trim() || profile.name,
+          age: age ? Number(age) : null,
+          weight: weight ? Number(weight) : null,
           conditions,
           lastPeriodStart: menopauseOnly ? null : lastPeriodStart,
           cycleLength: Number(cycleLength) || 28,
@@ -944,6 +1169,7 @@ const NAV = [
   { id: "dashboard", label: "Today", icon: Home },
   { id: "log", label: "Calendar", icon: CalendarIcon },
   { id: "habits", label: "Habits", icon: Check },
+  { id: "meals", label: "Meals", icon: Utensils },
   { id: "insights", label: "Insights", icon: BarChart2 },
   { id: "learn", label: "Learn", icon: BookOpen },
   { id: "profile", label: "Profile", icon: User },
@@ -1179,6 +1405,17 @@ const STYLE = `
 .accordion-body { padding: 0 16px 18px 58px; display: flex; flex-direction: column; gap: 10px; }
 .accordion-body p { font-size: 13.5px; line-height: 1.55; color: var(--ink-soft); margin: 0; }
 
+.diet-card { padding: 16px; border-bottom: 1px solid var(--border); }
+.diet-card:last-child { border-bottom: none; }
+.diet-card-title { font-family: 'Fraunces', serif; font-size: 15px; font-weight: 600; margin-bottom: 10px; color: var(--berry); }
+.diet-section { margin-bottom: 12px; }
+.diet-section:last-child { margin-bottom: 0; }
+.diet-section-label { font-size: 11px; font-weight: 600; color: var(--ink-soft); margin: 0 0 6px; text-transform: uppercase; letter-spacing: 0.04em; }
+.diet-section ul { margin: 0; padding-left: 18px; font-size: 13.5px; color: var(--ink); }
+.diet-section li { margin-bottom: 4px; }
+.diet-sample { list-style: none; padding-left: 0 !important; }
+.diet-sample li { margin-bottom: 6px; }
+
 .danger-zone { margin-top: 32px; padding-top: 20px; border-top: 1px solid var(--border); }
 .confirm-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; font-size: 13px; color: var(--ink-soft); }
 
@@ -1231,6 +1468,7 @@ export default function RituApp() {
   const [profile, setProfile] = useState(null);
   const [cycleLogs, setCycleLogs] = useState({});
   const [habitsData, setHabitsData] = useState({ config: [], completions: {} });
+  const [mealsData, setMealsData] = useState({ completions: {} });
   const [page, setPage] = useState("dashboard");
   const [selectedDate, setSelectedDate] = useState(null);
 
@@ -1251,6 +1489,11 @@ export default function RituApp() {
         if (h?.value && !cancelled) setHabitsData(JSON.parse(h.value));
         else if (!cancelled) setHabitsData({ config: [], completions: {} });
       } catch (e) { if (!cancelled) setHabitsData({ config: [], completions: {} }); }
+      try {
+        const me = await window.storage.get("meals");
+        if (me?.value && !cancelled) setMealsData(JSON.parse(me.value));
+        else if (!cancelled) setMealsData({ completions: {} });
+      } catch (e) { if (!cancelled) setMealsData({ completions: {} }); }
       if (!cancelled) {
         setProfile(loadedProfile);
         setLoading(false);
@@ -1314,14 +1557,25 @@ export default function RituApp() {
     persist("habits", next);
   }
 
+  function toggleMeal(slotId) {
+    const tk = todayKey();
+    const dayMap = { ...(mealsData.completions[tk] || {}) };
+    dayMap[slotId] = !dayMap[slotId];
+    const next = { ...mealsData, completions: { ...mealsData.completions, [tk]: dayMap } };
+    setMealsData(next);
+    persist("meals", next);
+  }
+
   async function resetAll() {
     setProfile(null);
     setCycleLogs({});
     setHabitsData({ config: [], completions: {} });
+    setMealsData({ completions: {} });
     setPage("dashboard");
     try { await window.storage.delete("profile"); } catch (e) {}
     try { await window.storage.delete("cycle-logs"); } catch (e) {}
     try { await window.storage.delete("habits"); } catch (e) {}
+    try { await window.storage.delete("meals"); } catch (e) {}
   }
 
   const tracksCycle = profile ? !(profile.conditions.length > 0 && profile.conditions.every((c) => c === "menopause")) : false;
@@ -1356,6 +1610,8 @@ export default function RituApp() {
       );
     } else if (page === "habits") {
       content = <HabitsPage habitsData={habitsData} onToggleHabit={toggleHabit} onAddHabit={addHabit} onRemoveHabit={removeHabit} />;
+    } else if (page === "meals") {
+      content = <MealsPage profile={profile} mealsData={mealsData} onToggleMeal={toggleMeal} />;
     } else if (page === "insights") {
       content = <InsightsPage cycleLogs={cycleLogs} habitsData={habitsData} />;
     } else if (page === "learn") {
